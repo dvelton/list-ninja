@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>List Ninja — SharePoint List Integration Kit Generator</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg-surface: #161b22;
+  --bg-raised: #1c2129;
+  --bg-input: #0d1117;
+  --border: #30363d;
+  --border-focus: #58a6ff;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --text-dim: #6e7681;
+  --accent: #58a6ff;
+  --accent-hover: #79c0ff;
+  --green: #3fb950;
+  --red: #f85149;
+  --orange: #d29922;
+  --purple: #bc8cff;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --radius: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+header {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+header h1 span { color: var(--accent); }
+
+header p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* Tabs */
+.tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: none;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  position: relative;
+  bottom: -1px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.tab:hover { color: var(--text); background: var(--bg-raised); }
+
+.tab.active {
+  color: var(--text);
+  background: var(--bg-surface);
+  border-color: var(--border);
+  border-bottom-color: var(--bg-surface);
+}
+
+.tab .close-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.tab:hover .close-tab { opacity: 0.6; }
+.tab .close-tab:hover { opacity: 1; background: var(--border); }
+
+.tab-add {
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: color 0.15s;
+}
+
+.tab-add:hover { color: var(--accent); }
+
+/* Form */
+.list-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group { margin-bottom: 16px; }
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+}
+
+input[type="text"], select {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  transition: border-color 0.15s;
+}
+
+input[type="text"]:focus, select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+select { cursor: pointer; }
+select option { background: var(--bg-surface); }
+
+.url-preview {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--bg-raised);
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  display: none;
+}
+
+.url-preview.visible { display: block; }
+
+.url-preview span { color: var(--green); }
+
+/* Column builder */
+.columns-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.columns-header h3 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.column-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 140px 32px;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.column-row input, .column-row select {
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+.btn-remove-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-remove-col:hover { color: var(--red); border-color: var(--border); }
+.btn-remove-col:disabled { opacity: 0.2; cursor: default; }
+.btn-remove-col:disabled:hover { color: var(--text-dim); border-color: transparent; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn:hover { background: var(--border); }
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0d1117;
+}
+
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+/* Generate bar */
+.generate-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.generate-bar .format-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.generate-bar .format-group label {
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.generate-bar .format-group select {
+  width: auto;
+  min-width: 180px;
+}
+
+/* Output */
+.output-section { display: none; }
+.output-section.visible { display: block; }
+
+.output-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.output-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.section-copy-bar {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.section-copy-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: var(--font-sans);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.section-copy-btn:hover { color: var(--text); border-color: var(--text-muted); }
+.section-copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+.output-textarea {
+  width: 100%;
+  min-height: 500px;
+  padding: 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  line-height: 1.6;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.output-textarea:focus { outline: none; border-color: var(--border-focus); }
+
+.btn-copied { color: var(--green) !important; border-color: var(--green) !important; }
+
+/* Utility */
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .column-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .column-row select { grid-column: 1 / -1; }
+  .column-row .btn-remove-col { grid-column: 2; justify-self: end; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1><span>List Ninja</span></h1>
+    <p>Generate a SharePoint List integration kit for your AI coding tool</p>
+  </header>
+
+  <div class="tabs-bar" id="tabs-bar"></div>
+
+  <div id="list-panels"></div>
+
+  <div class="generate-bar">
+    <div class="format-group">
+      <label for="format-select">Output format</label>
+      <select id="format-select">
+        <option value="markdown">Generic Markdown</option>
+        <option value="cursor">Cursor (.cursorrules)</option>
+        <option value="claude">Claude (Project Instructions)</option>
+        <option value="copilot">GitHub Copilot (AGENTS.md)</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="handleGenerate()">Generate Kit</button>
+  </div>
+
+  <div class="output-section" id="output-section">
+    <div class="output-header">
+      <h2>Integration Kit</h2>
+      <button class="btn btn-sm" id="copy-all-btn" onclick="copyAll()">Copy All</button>
+    </div>
+    <div class="section-copy-bar" id="section-copy-bar"></div>
+    <textarea class="output-textarea" id="output-textarea" readonly></textarea>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────
+let lists = [createDefaultList()];
+let activeListIndex = 0;
+let generatedSections = {};
+
+function createDefaultList() {
+  return {
+    url: '',
+    parsed: null,
+    columns: [
+      { displayName: '', internalName: 'Title', type: 'Text' },
+      { displayName: '', internalName: '', type: 'Text' }
+    ]
+  };
+}
+
+const COLUMN_TYPES = ['Text', 'Number', 'Choice', 'DateTime', 'Boolean', 'Person', 'Lookup'];
+
+function exampleValueForType(type) {
+  switch (type) {
+    case 'Text': return '"Sample text"';
+    case 'Number': return '42';
+    case 'Choice': return '"Active"';
+    case 'DateTime': return '"2024-01-15T00:00:00Z"';
+    case 'Boolean': return 'true';
+    case 'Person': return '{ Id: 12 }';
+    case 'Lookup': return '{ Id: 1 }';
+    default: return '""';
+  }
+}
+
+function spRestValueForType(type, fieldName) {
+  switch (type) {
+    case 'Text': return '"Sample text"';
+    case 'Number': return '42';
+    case 'Choice': return '"Active"';
+    case 'DateTime': return '"2024-01-15T00:00:00Z"';
+    case 'Boolean': return 'true';
+    case 'Person': return '12  // User ID integer';
+    case 'Lookup': return '1  // Lookup item ID integer';
+    default: return '""';
+  }
+}
+
+function postBodyFieldName(col) {
+  if (col.type === 'Person' || col.type === 'Lookup') {
+    return col.internalName + 'Id';
+  }
+  return col.internalName;
+}
+
+// ── URL Parsing ────────────────────────────────────────
+function parseSharePointUrl(url) {
+  if (!url) return null;
+  try {
+    let cleaned = url.trim();
+    if (!cleaned.match(/^https?:\/\//i)) cleaned = 'https://' + cleaned;
+
+    const u = new URL(cleaned);
+    const hostname = u.hostname;
+    if (!hostname.includes('sharepoint.com') && !hostname.includes('sharepoint.us')) return null;
+
+    let path = u.pathname;
+    // Remove trailing /AllItems.aspx or similar
+    path = path.replace(/\/[^/]*\.aspx$/i, '');
+    // Remove trailing slash
+    path = path.replace(/\/$/, '');
+
+    // Extract list name — last segment after /Lists/
+    const listsMatch = path.match(/\/Lists\/([^/]+)/i);
+    let listName = null;
+    let sitePath = null;
+
+    if (listsMatch) {
+      listName = decodeURIComponent(listsMatch[1]);
+      sitePath = path.substring(0, path.indexOf('/Lists'));
+    } else {
+      // Try pattern: /sites/SiteName/ListName or just take the last segment
+      const segments = path.split('/').filter(Boolean);
+      if (segments.length >= 2) {
+        listName = decodeURIComponent(segments[segments.length - 1]);
+        sitePath = '/' + segments.slice(0, -1).join('/');
+      }
+    }
+
+    if (!listName || !sitePath) return null;
+
+    const siteUrl = u.protocol + '//' + hostname + sitePath;
+
+    return {
+      hostname,
+      sitePath,
+      listName,
+      siteUrl
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+// ── Rendering ──────────────────────────────────────────
+function render() {
+  renderTabs();
+  renderListPanel();
+}
+
+function renderTabs() {
+  const bar = document.getElementById('tabs-bar');
+  let html = '';
+  lists.forEach((list, i) => {
+    const name = list.parsed ? list.parsed.listName : ('List ' + (i + 1));
+    const active = i === activeListIndex ? ' active' : '';
+    const canClose = lists.length > 1;
+    html += '<button class="tab' + active + '" onclick="switchTab(' + i + ')">'
+      + escHtml(name);
+    if (canClose) {
+      html += ' <span class="close-tab" onclick="event.stopPropagation(); removeList(' + i + ')">&times;</span>';
+    }
+    html += '</button>';
+  });
+  html += '<button class="tab-add" onclick="addList()" title="Add another list">+</button>';
+  bar.innerHTML = html;
+}
+
+function renderListPanel() {
+  const container = document.getElementById('list-panels');
+  const list = lists[activeListIndex];
+  const idx = activeListIndex;
+
+  let html = '<div class="list-panel">';
+
+  // URL input
+  html += '<div class="form-group">';
+  html += '<label for="url-input">SharePoint List URL</label>';
+  html += '<input type="text" id="url-input" placeholder="https://contoso.sharepoint.com/sites/Marketing/Lists/CampaignTracker" value="' + escAttr(list.url) + '" oninput="handleUrlChange(this.value)">';
+
+  const p = list.parsed;
+  const previewVisible = p ? ' visible' : '';
+  html += '<div class="url-preview' + previewVisible + '" id="url-preview">';
+  if (p) {
+    html += '<span>Tenant:</span> ' + escHtml(p.hostname) + '<br>';
+    html += '<span>Site:</span> ' + escHtml(p.sitePath) + '<br>';
+    html += '<span>List:</span> ' + escHtml(p.listName) + '<br>';
+    html += '<span>Base URL:</span> ' + escHtml(p.siteUrl);
+  }
+  html += '</div>';
+  html += '</div>';
+
+  // Column builder
+  html += '<div class="form-group">';
+  html += '<div class="columns-header">';
+  html += '<h3>Column Schema</h3>';
+  html += '<button class="btn btn-sm" onclick="addColumn()">+ Add Column</button>';
+  html += '</div>';
+
+  // Column header row
+  html += '<div class="column-row" style="margin-bottom:4px">';
+  html += '<span style="font-size:12px;color:var(--text-dim)">Display Name</span>';
+  html += '<span style="font-size:12px;color:var(--text-dim)">Internal Field Name</span>';
+  html += '<span style="font-size:12px;color:var(--text-dim)">Type</span>';
+  html += '<span></span>';
+  html += '</div>';
+
+  list.columns.forEach((col, ci) => {
+    const canRemove = list.columns.length > 1;
+    html += '<div class="column-row">';
+    html += '<input type="text" placeholder="e.g. Campaign Name" value="' + escAttr(col.displayName) + '" onchange="updateColumn(' + ci + ', \'displayName\', this.value)">';
+    html += '<input type="text" placeholder="e.g. CampaignName" value="' + escAttr(col.internalName) + '" onchange="updateColumn(' + ci + ', \'internalName\', this.value)">';
+
+    html += '<select onchange="updateColumn(' + ci + ', \'type\', this.value)">';
+    COLUMN_TYPES.forEach(t => {
+      const sel = t === col.type ? ' selected' : '';
+      html += '<option value="' + t + '"' + sel + '>' + t + '</option>';
+    });
+    html += '</select>';
+
+    html += '<button class="btn-remove-col"' + (canRemove ? '' : ' disabled') + ' onclick="removeColumn(' + ci + ')" title="Remove column">&times;</button>';
+    html += '</div>';
+  });
+
+  html += '</div>'; // form-group
+  html += '</div>'; // list-panel
+
+  container.innerHTML = html;
+}
+
+// ── List / Tab Management ──────────────────────────────
+function switchTab(index) {
+  activeListIndex = index;
+  render();
+}
+
+function addList() {
+  lists.push(createDefaultList());
+  activeListIndex = lists.length - 1;
+  render();
+}
+
+function removeList(index) {
+  if (lists.length <= 1) return;
+  lists.splice(index, 1);
+  if (activeListIndex >= lists.length) activeListIndex = lists.length - 1;
+  render();
+}
+
+// ── Column Management ──────────────────────────────────
+function addColumn() {
+  lists[activeListIndex].columns.push({ displayName: '', internalName: '', type: 'Text' });
+  renderListPanel();
+}
+
+function removeColumn(colIndex) {
+  const cols = lists[activeListIndex].columns;
+  if (cols.length <= 1) return;
+  cols.splice(colIndex, 1);
+  renderListPanel();
+}
+
+function updateColumn(colIndex, field, value) {
+  lists[activeListIndex].columns[colIndex][field] = value;
+}
+
+// ── URL Change Handler ─────────────────────────────────
+function handleUrlChange(value) {
+  const list = lists[activeListIndex];
+  list.url = value;
+  list.parsed = parseSharePointUrl(value);
+
+  const preview = document.getElementById('url-preview');
+  if (list.parsed) {
+    preview.classList.add('visible');
+    let html = '<span>Tenant:</span> ' + escHtml(list.parsed.hostname) + '<br>';
+    html += '<span>Site:</span> ' + escHtml(list.parsed.sitePath) + '<br>';
+    html += '<span>List:</span> ' + escHtml(list.parsed.listName) + '<br>';
+    html += '<span>Base URL:</span> ' + escHtml(list.parsed.siteUrl);
+    preview.innerHTML = html;
+  } else {
+    preview.classList.remove('visible');
+  }
+  renderTabs();
+}
+
+// ── Kit Generation ─────────────────────────────────────
+function handleGenerate() {
+  // Validate
+  let valid = true;
+  for (let i = 0; i < lists.length; i++) {
+    if (!lists[i].parsed) {
+      alert('List ' + (i + 1) + ' has an invalid or missing SharePoint URL. Enter a URL like:\nhttps://contoso.sharepoint.com/sites/Marketing/Lists/CampaignTracker');
+      valid = false;
+      break;
+    }
+    const hasColumns = lists[i].columns.some(c => c.internalName.trim());
+    if (!hasColumns) {
+      alert('List ' + (i + 1) + ' (' + lists[i].parsed.listName + ') needs at least one column with an internal field name.');
+      valid = false;
+      break;
+    }
+  }
+  if (!valid) return;
+
+  const format = document.getElementById('format-select').value;
+  generatedSections = generateSections();
+  const output = formatOutput(generatedSections, format);
+
+  document.getElementById('output-textarea').value = output;
+  document.getElementById('output-section').classList.add('visible');
+  renderSectionCopyBar();
+  document.getElementById('output-textarea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function generateSections() {
+  const sections = {};
+
+  // Section: How to Use
+  sections['How to Use This Kit'] = generateHowToUse();
+
+  // Section: Auth & Request Pattern
+  sections['Auth & Request Pattern'] = generateAuthPattern();
+
+  // Per-list sections
+  lists.forEach((list, i) => {
+    const p = list.parsed;
+    const cols = list.columns.filter(c => c.internalName.trim());
+    const prefix = lists.length > 1 ? (p.listName + ' — ') : '';
+
+    sections[prefix + 'API Endpoints'] = generateEndpoints(p, cols);
+    sections[prefix + 'Column Schema'] = generateSchemaTable(cols);
+  });
+
+  // Combined system prompt
+  sections['AI System Prompt'] = generateSystemPrompt();
+
+  // Deployment
+  sections['Deployment'] = generateDeployment();
+
+  return sections;
+}
+
+function generateHowToUse() {
+  const listNames = lists.map(l => l.parsed.listName).join(', ');
+  return `This integration kit gives an AI coding tool everything it needs to build you a working web app backed by your SharePoint list${lists.length > 1 ? 's' : ''} (${listNames}).
+
+Your generated app will be a single HTML file that you upload to your SharePoint site. Once uploaded, it runs directly in your browser and reads/writes data from your SharePoint list using your existing login. No extra accounts, no app registration, no IT department involvement needed.
+
+How to use this kit:
+
+1. Pick an AI coding tool. Any of these work:
+   - Lovable (lovable.dev) — describe what you want in plain English, get a working app
+   - Cursor (cursor.com) — an AI-powered code editor
+   - Claude (claude.ai) — paste this kit into a conversation and ask it to build your app
+   - GitHub Copilot — use with VS Code or the CLI
+
+2. Start a new project or conversation in your chosen tool.
+
+3. Paste this entire kit as context. In most tools, you can paste it directly into the chat or add it as project instructions/rules.
+
+4. Describe the app you want in plain English. For example:
+   - "Build me a dashboard that shows all items from my list in a sortable table"
+   - "Create a form that lets me add and edit items in my list"
+   - "Make a kanban board that groups items by their Status column"
+
+5. The AI will generate an HTML file for you. Save that file.
+
+6. Deploy it to your SharePoint site (see the Deployment section at the end of this kit).
+
+The app runs entirely in your browser. Your data stays in SharePoint — the app just reads and writes to it using SharePoint's built-in API. Because the app lives on the same SharePoint site as your list, your existing SharePoint login handles all authentication automatically.`;
+}
+
+function generateAuthPattern() {
+  const siteUrl = lists[0].parsed.siteUrl;
+  return `No separate authentication setup is needed. When the app runs from your SharePoint site, the browser automatically sends your login credentials with every API request.
+
+For read operations (getting data), no special headers are required beyond accepting JSON.
+
+For write operations (creating, updating, or deleting items), the app needs a "request digest" — a short-lived token that SharePoint uses to verify the request is legitimate. Here is the standard pattern:
+
+\`\`\`javascript
+// Helper: get a request digest for write operations
+async function getRequestDigest() {
+  const resp = await fetch('${siteUrl}/_api/contextinfo', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json;odata=nometadata' },
+    credentials: 'same-origin'
+  });
+  const data = await resp.json();
+  return data.FormDigestValue;
+}
+
+// Helper: make a SharePoint API call
+async function spFetch(endpoint, options = {}) {
+  const url = '${siteUrl}/_api' + endpoint;
+  const headers = {
+    'Accept': 'application/json;odata=nometadata',
+    ...options.headers
+  };
+
+  const resp = await fetch(url, {
+    ...options,
+    headers,
+    credentials: 'same-origin'
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error('SharePoint API error (' + resp.status + '): ' + err);
+  }
+
+  const text = await resp.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// Helper: make a write request (POST, PATCH, DELETE)
+async function spWrite(endpoint, options = {}) {
+  const digest = await getRequestDigest();
+  return spFetch(endpoint, {
+    ...options,
+    headers: {
+      'X-RequestDigest': digest,
+      'Content-Type': 'application/json;odata=nometadata',
+      ...options.headers
+    }
+  });
+}
+\`\`\``;
+}
+
+function generateEndpoints(parsed, columns) {
+  const listTitle = parsed.listName;
+  const siteUrl = parsed.siteUrl;
+  const base = siteUrl + "/_api/web/lists/getbytitle('" + listTitle + "')";
+
+  // Pick first non-Title column for filter example
+  const filterCol = columns.find(c => c.internalName !== 'Title') || columns[0];
+  const filterExample = filterCol.type === 'Number'
+    ? filterCol.internalName + ' gt 10'
+    : filterCol.internalName + " eq 'SomeValue'";
+
+  // Build POST body example
+  const postFields = columns.map(c => {
+    const fname = postBodyFieldName(c);
+    return '    "' + fname + '": ' + spRestValueForType(c.type, c.internalName);
+  }).join(',\n');
+
+  // Build PATCH body example (just first two fields)
+  const patchCols = columns.slice(0, 2);
+  const patchFields = patchCols.map(c => {
+    const fname = postBodyFieldName(c);
+    return '    "' + fname + '": ' + spRestValueForType(c.type, c.internalName);
+  }).join(',\n');
+
+  return `Base URL: ${base}
+
+GET all items (first 100):
+\`\`\`
+GET ${base}/items?$top=100
+Headers:
+  Accept: application/json;odata=nometadata
+\`\`\`
+
+Using the helper:
+\`\`\`javascript
+const data = await spFetch("/web/lists/getbytitle('${listTitle}')/items?$top=100");
+const items = data.value; // array of items
+\`\`\`
+
+GET filtered items:
+\`\`\`
+GET ${base}/items?$filter=${filterExample}&$top=100
+\`\`\`
+
+GET single item by ID:
+\`\`\`
+GET ${base}/items(42)
+\`\`\`
+
+POST new item:
+\`\`\`javascript
+await spWrite("/web/lists/getbytitle('${listTitle}')/items", {
+  method: 'POST',
+  body: JSON.stringify({
+${postFields}
+  })
+});
+\`\`\`
+
+PATCH (update) item by ID:
+\`\`\`javascript
+await spWrite("/web/lists/getbytitle('${listTitle}')/items(42)", {
+  method: 'POST',
+  body: JSON.stringify({
+${patchFields}
+  }),
+  headers: {
+    'IF-MATCH': '*',
+    'X-HTTP-Method': 'MERGE'
+  }
+});
+\`\`\`
+
+DELETE item by ID:
+\`\`\`javascript
+await spWrite("/web/lists/getbytitle('${listTitle}')/items(42)", {
+  method: 'POST',
+  headers: {
+    'IF-MATCH': '*',
+    'X-HTTP-Method': 'DELETE'
+  }
+});
+\`\`\``;
+}
+
+function generateSchemaTable(columns) {
+  let table = '| Display Name | Internal Field Name | Type | Example Value |\n';
+  table += '|---|---|---|---|\n';
+  columns.forEach(col => {
+    const display = col.displayName || col.internalName;
+    const bodyField = postBodyFieldName(col);
+    const example = spRestValueForType(col.type, col.internalName);
+    table += '| ' + display + ' | ' + bodyField + ' | ' + col.type + ' | ' + example + ' |\n';
+  });
+
+  if (columns.some(c => c.type === 'Person')) {
+    table += '\nPerson fields: Use the field name with "Id" suffix (e.g., AssignedToId) and pass the SharePoint user ID as an integer. To find a user ID, query /_api/web/siteusers.';
+  }
+  if (columns.some(c => c.type === 'Lookup')) {
+    table += '\nLookup fields: Use the field name with "Id" suffix (e.g., CategoryId) and pass the lookup item\'s ID as an integer.';
+  }
+
+  return table;
+}
+
+function generateSystemPrompt() {
+  const listSummaries = lists.map(list => {
+    const p = list.parsed;
+    const cols = list.columns.filter(c => c.internalName.trim());
+    return `List "${p.listName}" at ${p.siteUrl}
+Columns: ${cols.map(c => c.internalName + ' (' + c.type + ')').join(', ')}`;
+  }).join('\n\n');
+
+  const endpoints = lists.map(list => {
+    const p = list.parsed;
+    return `- All items: ${p.siteUrl}/_api/web/lists/getbytitle('${p.listName}')/items?$top=100
+- Single item: ${p.siteUrl}/_api/web/lists/getbytitle('${p.listName}')/items({id})
+- Filter: add $filter= parameter
+- Create: POST to /items with JSON body
+- Update: POST to /items({id}) with X-HTTP-Method: MERGE and IF-MATCH: * headers
+- Delete: POST to /items({id}) with X-HTTP-Method: DELETE and IF-MATCH: * headers`;
+  }).join('\n\n');
+
+  return `Copy and paste the block below as your AI system prompt or initial instructions:
+
+---
+
+I am building a single-page web app backed by SharePoint List${lists.length > 1 ? 's' : ''}. The app will be hosted on the SharePoint site itself (uploaded to a Site Assets library).
+
+Do not suggest any other database, backend, or auth mechanism. Do not use Microsoft Graph API. Use the SharePoint REST API exclusively.
+
+Authentication is handled automatically by the browser — the app runs on the same domain as SharePoint, so session cookies are sent with every request. Use fetch() with credentials: 'same-origin'. No tokens, no MSAL, no app registration.
+
+For write operations (POST, PATCH, DELETE), always get a request digest first by POSTing to /_api/contextinfo and reading the FormDigestValue from the response.
+
+Here are my list${lists.length > 1 ? 's' : ''}:
+
+${listSummaries}
+
+API endpoints:
+
+${endpoints}
+
+Always include these headers:
+- Accept: application/json;odata=nometadata
+- Content-Type: application/json;odata=nometadata (for write operations)
+- X-RequestDigest: {digest} (for write operations)
+
+When updating items, use POST with X-HTTP-Method: MERGE and IF-MATCH: * headers.
+When deleting items, use POST with X-HTTP-Method: DELETE and IF-MATCH: * headers.
+
+The app must be a single self-contained HTML file with inline CSS and JavaScript. No external dependencies, no CDN imports, no build step. It needs to work when uploaded to a SharePoint document library and opened directly in a browser.
+
+---`;
+}
+
+function generateDeployment() {
+  const siteUrl = lists[0].parsed.siteUrl;
+  return `Once your AI tool generates the app (an HTML file), upload it to your SharePoint site:
+
+1. Open your SharePoint site: ${siteUrl}
+
+2. Click the gear icon (top right) and select "Site contents"
+
+3. Open the "Site Assets" library (if you don't see it, you can create a new document library called "Apps" or similar)
+
+4. Click "Upload" and select your HTML file
+
+5. Once uploaded, click on the file name to open it. It should load as a web page in your browser with full access to your list data.
+
+If the file downloads instead of opening as a web page:
+Your site may have "custom script" disabled. This is a site-level setting (not a global IT policy) that controls whether HTML files can run JavaScript.
+
+To check or change this:
+- You need to be a site collection administrator (usually the person who created the site)
+- Go to the SharePoint admin center or use this PowerShell command:
+  Set-SPOSite -Identity "${siteUrl}" -DenyAddAndCustomizePages $false
+- Alternatively, ask whoever created the SharePoint site to enable custom script — this is a routine site setting, not a security escalation
+
+If you cannot enable custom script, an alternative is to save the HTML file locally and open it in your browser. Note that API calls will fail from a local file due to browser security restrictions (cross-origin policy), but you can still preview the app's layout and UI.`;
+}
+
+// ── Format Output ──────────────────────────────────────
+function formatOutput(sections, format) {
+  switch (format) {
+    case 'cursor': return formatCursor(sections);
+    case 'claude': return formatClaude(sections);
+    case 'copilot': return formatCopilot(sections);
+    default: return formatMarkdown(sections);
+  }
+}
+
+function formatMarkdown(sections) {
+  const listNames = lists.map(l => l.parsed.listName).join(', ');
+  const tenant = lists[0].parsed.hostname;
+  let out = '# SharePoint List Integration Kit\n';
+  out += '## ' + listNames + ' @ ' + tenant + '\n\n';
+
+  Object.entries(sections).forEach(([title, content]) => {
+    out += '### ' + title + '\n\n';
+    out += content + '\n\n';
+  });
+
+  return out.trim();
+}
+
+function formatCursor(sections) {
+  let out = '# SharePoint List Integration Rules\n\n';
+  out += 'This project uses SharePoint Lists as its backend via the SharePoint REST API.\n';
+  out += 'The app runs from the SharePoint site itself — auth is automatic via browser session.\n\n';
+
+  Object.entries(sections).forEach(([title, content]) => {
+    out += '## ' + title + '\n\n';
+    out += content + '\n\n';
+  });
+
+  return out.trim();
+}
+
+function formatClaude(sections) {
+  const listNames = lists.map(l => l.parsed.listName).join(', ');
+  let out = 'SharePoint List Integration Kit: ' + listNames + '\n\n';
+  out += 'This project knowledge document provides complete API reference and instructions for building a web app backed by SharePoint Lists.\n\n';
+
+  Object.entries(sections).forEach(([title, content]) => {
+    out += '---\n\n';
+    out += '## ' + title + '\n\n';
+    out += content + '\n\n';
+  });
+
+  return out.trim();
+}
+
+function formatCopilot(sections) {
+  const listNames = lists.map(l => l.parsed.listName).join(', ');
+  let out = '# SharePoint List Integration Kit\n\n';
+  out += '## Description\n\n';
+  out += 'This app is backed by SharePoint List' + (lists.length > 1 ? 's' : '') + ' (' + listNames + '). ';
+  out += 'It uses the SharePoint REST API with session-based authentication. ';
+  out += 'The app is hosted on the SharePoint site and requires no separate auth configuration.\n\n';
+  out += '## Instructions\n\n';
+
+  Object.entries(sections).forEach(([title, content]) => {
+    out += '### ' + title + '\n\n';
+    out += content + '\n\n';
+  });
+
+  return out.trim();
+}
+
+// ── Section Copy ───────────────────────────────────────
+function renderSectionCopyBar() {
+  const bar = document.getElementById('section-copy-bar');
+  const keys = Object.keys(generatedSections);
+  let html = '';
+  keys.forEach((key, i) => {
+    html += '<button class="section-copy-btn" data-section="' + i + '" onclick="copySection(\'' + escAttr(key) + '\', this)">' + escHtml(key) + '</button>';
+  });
+  bar.innerHTML = html;
+}
+
+function copySection(sectionKey, btn) {
+  const text = generatedSections[sectionKey];
+  if (!text) return;
+  copyTextToClipboard(text, btn);
+}
+
+function copyAll() {
+  const textarea = document.getElementById('output-textarea');
+  const btn = document.getElementById('copy-all-btn');
+  copyTextToClipboard(textarea.value, btn);
+}
+
+function copyTextToClipboard(text, btn) {
+  const originalText = btn.textContent;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      flashCopied(btn, originalText);
+    }).catch(() => {
+      fallbackCopy(text, btn, originalText);
+    });
+  } else {
+    fallbackCopy(text, btn, originalText);
+  }
+}
+
+function fallbackCopy(text, btn, originalText) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    flashCopied(btn, originalText);
+  } catch (e) {
+    btn.textContent = 'Failed';
+    setTimeout(() => { btn.textContent = originalText; }, 1500);
+  }
+  document.body.removeChild(ta);
+}
+
+function flashCopied(btn, originalText) {
+  btn.textContent = 'Copied!';
+  btn.classList.add('btn-copied');
+  setTimeout(() => {
+    btn.textContent = originalText;
+    btn.classList.remove('btn-copied');
+  }, 1500);
+}
+
+// ── Utilities ──────────────────────────────────────────
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function escAttr(str) {
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── Init ───────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
