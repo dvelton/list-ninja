@@ -12,7 +12,7 @@ List Ninja automates the tedious part. You enter your list's URL and column sche
 
 ## How to use it
 
-1. Open `index.html` in your browser (works locally — no server needed)
+1. Open `index.html` in your browser (works locally — no server needed), or just click [here](https://dvelton.github.io/list-ninja/).
 2. Paste your SharePoint List URL (e.g., `https://contoso.sharepoint.com/sites/Marketing/Lists/CampaignTracker`)
 3. Define your columns: enter the display name, internal field name, and type for each column
 4. Pick an output format (Generic Markdown, Cursor, Claude, or GitHub Copilot)
